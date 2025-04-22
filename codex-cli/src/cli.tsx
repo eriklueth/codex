@@ -368,23 +368,18 @@ if (cli.flags.quiet) {
     process.exit(1);
   }
 
-  // Determine approval policy for quiet mode based on flags
-  const quietApprovalPolicy: ApprovalPolicy =
-    cli.flags.fullAuto || cli.flags.approvalMode === "full-auto"
-      ? AutoApprovalMode.FULL_AUTO
-      : cli.flags.autoEdit || cli.flags.approvalMode === "auto-edit"
-      ? AutoApprovalMode.AUTO_EDIT
-      : config.approvalMode || AutoApprovalMode.SUGGEST;
-
-  await runQuietMode({
-    prompt,
-    imagePaths: imagePaths || [],
-    approvalPolicy: quietApprovalPolicy,
-    additionalWritableRoots,
-    config,
-  });
-  onExit();
-  process.exit(0);
+  // In quiet mode, only use the non-interactive runner when in suggest mode.
+  if (quietApprovalPolicy === AutoApprovalMode.SUGGEST) {
+    await runQuietMode({
+      prompt,
+      imagePaths: imagePaths || [],
+      approvalPolicy: quietApprovalPolicy,
+      additionalWritableRoots,
+      config,
+    });
+    onExit();
+    process.exit(0);
+  }
 }
 
 // Default to the "suggest" policy.
